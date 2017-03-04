@@ -31,4 +31,14 @@ y = pulstran(t, d, a, Striang, tau)
 plt.figure()
 plt.grid()
 plt.plot(t, y)
+
+Nfft = int(2 ** np.ceil(np.log2(len(y))))
+sp = fft(y, Nfft)
+sp_dB = 20 * np.log10(np.abs(sp))
+f = np.arange(0, Nfft - 1) / Nfft * Fs
+plt.figure()
+plt.grid()
+plt.plot(f[:int(Nfft / 2)], np.abs(sp[:int(Nfft / 2)]))
+
+
 plt.show()

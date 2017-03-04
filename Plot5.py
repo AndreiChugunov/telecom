@@ -24,4 +24,13 @@ T2 = 60e-3
 s = A * (T2 * np.asarray(Striang(t, T2, 0)) - T1 * np.asarray(Striang(t, T1, 0))) / (T2 - T1)
 plt.figure()
 plt.plot(t[0:len(s)], s)
+
+plt.figure()
+Nfft = int(2 ** np.ceil(np.log2(len(s))))
+sp = fft(s, Nfft)
+sp_dB = 20 * np.log10(np.abs(sp))
+f = np.arange(0, Nfft - 1) / Nfft * Fs
+plt.grid()
+plt.plot(f[:int(Nfft / 2)], np.abs(sp[:int(Nfft / 2)]))
+plt.axis([-10, 80, 0, 1500])
 plt.show()
