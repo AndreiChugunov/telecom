@@ -13,7 +13,7 @@ f0 = 10
 phi = np.pi / 4
 sig = A * np.cos(2 * np.pi * f0 * t + phi)
 noiseSig = A / 4 * np.cos(20 * np.pi * f0 * t + phi) + sig
-
+sig = np.asarray(sig)
 Nfft = int(2 ** np.ceil(np.log2(len(sig))))
 sp = fft(sig, Nfft)
 sp_dB = 20 * np.log10(np.abs(sp))
@@ -37,7 +37,7 @@ plt.plot(t, sig)
 plt.figure()
 plt.plot(t, noiseSig)
 
-filteredSig = noiseSig
+filteredSig = np.asarray(noiseSig)
 window = np.arange(50)
 for si in (np.arange(len(noiseSig) - len(window))):
     sum = 0
@@ -64,13 +64,35 @@ plt.grid()
 plt.plot(f[:int(Nfft / 2)], np.abs(sp[:int(Nfft / 2)]))
 plt.axis([0, 250, 0, 4000])
 
-windowRange = np.arange(9)
-mas = []
-for si in np.arange(int(len(windowRange) / 2)):
-    for di in np.arange(int(len(windowRange) / 2) - si):
-        mas.append(noiseSig[0])
+noiseSignal = A / 4 * np.cos(20 * np.pi * f0 * t + phi) + sig
+pureSig = signal.medfilt(noiseSignal, 85)
+plt.figure()
+plt.plot(t, pureSig)
 
-for si in np.arange(int(len(windowRange) / 2) + 1, len(noiseSig) - int(len(windowRange) / 2)):
-    sum = sum + 1;
+Nfft = int(2 ** np.ceil(np.log2(len(pureSig))))
+sp = fft(pureSig, Nfft)
+sp_dB = 20 * np.log10(np.abs(sp))
+f = np.arange(0, Nfft - 1) / Nfft * Fdiscrete
+plt.figure()
+plt.grid()
+plt.plot(f[:int(Nfft / 2)], np.abs(sp[:int(Nfft / 2)]))
+plt.axis([0, 250, 0, 4000])
+
+cutoff = 0.1
+noiseSig =  A / 4 * np.cos(20 * np.pi * f0 * t + phi) + sig
+b, a = signal.butter(4, cutoff/(f0/2), btype='low', analog=False, output='ba')
+y = signal.lfilter(b, a, noiseSig)
+# Get the filter coefficients so we can check its frequency response.
+plt.figure()
+plt.plot(t, y)
+
+Nfft = int(2 ** np.ceil(np.log2(len(y))))
+sp = fft(y, Nfft)
+sp_dB = 20 * np.log10(np.abs(sp))
+f = np.arange(0, Nfft - 1) / Nfft * Fdiscrete
+plt.figure()
+plt.grid()
+plt.plot(f[:int(Nfft / 2)], np.abs(sp[:int(Nfft / 2)]))
+plt.axis([0, 250, 0, 4000])
 
 plt.show()
